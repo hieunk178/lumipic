@@ -30,7 +30,10 @@ class ImageConvertController extends Controller
         if (!file_exists($absolutePath)) {
             return response()->json(['error' => 'File does not exist'], 404);
         }
-
+        $compressedDir = public_path('/uploads/converted');
+        if (!is_dir($compressedDir)) {
+            mkdir($compressedDir, 0755, true);
+        }
         $format = $request->input('format') ?? 'jpg';
         $convertedImagePath = "/uploads/converted/{$originalFilename}_lumipic_convert.{$format}";
 

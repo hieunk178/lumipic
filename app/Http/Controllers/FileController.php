@@ -19,6 +19,10 @@ class FileController extends Controller
         if (!$image) {
             return response()->json(['error' => 'No image uploaded'], 400);
         }
+        $compressedDir = public_path('/uploads/images');
+        if (!is_dir($compressedDir)) {
+            mkdir($compressedDir, 0755, true);
+        }
         $originalFilename = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
         $imagePath = $image->store('images', 'local');
         $url = Storage::url($imagePath);

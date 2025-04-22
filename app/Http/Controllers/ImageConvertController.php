@@ -25,22 +25,21 @@ class ImageConvertController extends Controller
         ]);
 
         $originalFilename = $request->input('name') ?? 'image';
-        $relativePath = str_replace('/storage/', '', $request->input('path'));
-        $absolutePath = storage_path("app/public/{$relativePath}");
-
+        $relativePath = $request->input('path');
+        $absolutePath = public_path($relativePath);
         if (!file_exists($absolutePath)) {
             return response()->json(['error' => 'File does not exist'], 404);
         }
 
         $format = $request->input('format') ?? 'jpg';
-        $convertedImagePath = "converted/{$originalFilename}_lumipic_convert.{$format}";
+        $convertedImagePath = "/uploads/converted/{$originalFilename}_lumipic_convert.{$format}";
 
         Image::load($absolutePath)
             ->format($format)
-            ->save(storage_path("app/public/{$convertedImagePath}"));
+            ->save(public_path($convertedImagePath));
         $convertedImage = [
             'name' => $originalFilename,
-            'path' => Storage::url($convertedImagePath),
+            'path' => $convertedImagePath,
         ];
         return response()->json($convertedImage);
     }

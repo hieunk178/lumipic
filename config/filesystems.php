@@ -32,8 +32,9 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => storage_path('app/private'),
+            'root' => public_path('uploads'),
             'serve' => true,
+            'url' => env('APP_URL') . '/uploads',
             'throw' => false,
             'report' => false,
         ],

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+use function Termwind\parse;
+
 class FileController extends Controller
 {
     public function upload(Request $request)
@@ -18,10 +20,12 @@ class FileController extends Controller
             return response()->json(['error' => 'No image uploaded'], 400);
         }
         $originalFilename = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-        $imagePath = $image->store('images', 'public');
+        $imagePath = $image->store('images', 'local');
+        $url = Storage::url($imagePath);
         $uploadedImage = [
             'name' => $originalFilename,
-            'path' => Storage::url($imagePath),
+            'path' => parse_url($url, PHP_URL_PATH),
+            'url' => $url,
         ];
         return response()->json($uploadedImage);
     }
@@ -35,7 +39,7 @@ class FileController extends Controller
 
         $zip = new \ZipArchive();
         $zipName = 'converted_images.zip';
-        $zipPath = storage_path("app/public/{$zipName}");
+        $zipPath = public_path("/uploads/zip/{$zipName}");
         if (file_exists($zipPath)) {
             unlink($zipPath);
         }
@@ -44,8 +48,7 @@ class FileController extends Controller
         }
 
         foreach ($request->input('images') as $image) {
-            $relativePath = str_replace('/storage/', '', parse_url($image['path'], PHP_URL_PATH));
-            $absolutePath = storage_path("app/public/{$relativePath}");
+            $absolutePath = public_path($image['path']);
 
             if (!file_exists($absolutePath)) {
                 continue;

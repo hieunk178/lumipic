@@ -24,22 +24,25 @@ class ImageCompressController
         ]);
 
         $originalFilename = $request->input('name') ?? 'image';
-        $relativePath = str_replace('/storage/', '', $request->input('path'));
-        $absolutePath = storage_path("app/public/{$relativePath}");
+        $absolutePath = public_path($request->input('path'));
 
         if (!file_exists($absolutePath)) {
             return response()->json(['error' => 'File does not exist'], 404);
         }
 
         $quality = $request->input('quality') ?? 80;
-        $compressedImagePath = "compressed/{$originalFilename}_lumipic_compress.jpg";
+        $compressedDir = public_path('/uploads/compressed');
+        if (!is_dir($compressedDir)) {
+            mkdir($compressedDir, 0755, true);
+        }
+        $compressedImagePath = "/uploads/compressed/{$originalFilename}_lumipic_compress.jpg";
 
         Image::load($absolutePath)
             ->quality($quality)
-            ->save(storage_path("app/public/{$compressedImagePath}"));
+            ->save(public_path($compressedImagePath));
         $compressedImage = [
             'name' => $originalFilename,
-            'path' => Storage::url($compressedImagePath),
+            'path' => $compressedImagePath,
         ];
         return response()->json($compressedImage);
     }
